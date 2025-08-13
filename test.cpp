@@ -21,7 +21,7 @@ void add(int *a, int *b, int *c, long N) {
     }
 }
 
-#define N 1000000000 // 1B elements
+#define N 1073741824 // 1B+ elements
 int main(void) {
     int *a, *b, *c;
 
@@ -46,7 +46,7 @@ int main(void) {
 
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    std::cout << "Added " << N << "-integer vectors in " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Added two " << N << "-integer vectors in " << duration.count() << " microseconds" << std::endl;
 
     return 0;
 }

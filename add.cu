@@ -22,10 +22,15 @@ __global__ void add(int *a, int *b, int *c) {
     // c[threadIdx.x] = a[threadIdx.x] + b[threadIdx.x];
 
     // one way to make use of both threads and blocks is by using both the blockIdx and threadIdx together
-    // for every block index, we have 8 thread indices, so for M threads/block
+    // for example, if for every block index we have 8 thread indices, for M threads/blocks, the corresponding index would be:
+    // int index = threadIdx.x + blockIdx.x * M;
+    // we do not have to pass M, however - the builtin variable blockDim.x gives us the value we need (threads/block)
+    long index = threadIdx.x + blockIdx.x * blockDim.x;
+    c[index] = a[index] + b[index];
 }
 
-#define N 1000000000 // 1M elements
+#define N 1073741824 // define num elements
+#define THREADS_PER_BLOCK 16384 // define the number of threads per block
 int main(void) {
     int *a, *b, *c; // host copies of a, b, c
     int *d_a, *d_b, *d_c; // device copies of a, b, c
@@ -50,7 +55,8 @@ int main(void) {
     // triple brackets mark a call to device code or "kernel launch"
     // inner parameters are execution configuration - first parameter indicates using multiple blocks, second parameter indicates using multiple threads
     // we can make our programs even more massively parallel by using both blocks and threads in tandem 
-    add<<<1,N>>>(d_a, d_b, d_c);
+    add<<<N / THREADS_PER_BLOCK, THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
+    // threads are useful as, unlike blocks, they have mechanisms to communicate and synchronize
 
     // copy result back to host
     cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
@@ -63,7 +69,7 @@ int main(void) {
 
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    std::cout << "Added " << N << "-integer vectors in " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Added two " << N << "-integer vectors in " << duration.count() << " microseconds" << std::endl;
 
     return 0;
 }
