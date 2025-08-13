@@ -29,4 +29,4 @@ run: $(BIN)
 	@:
 
 clean:
-	rm -f $(BIN)
+	rm -rf build/
