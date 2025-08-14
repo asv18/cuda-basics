@@ -1,11 +1,16 @@
 #include <stdio.h>
 
-__global__ void hello(){
+__global__ void hello() {
   printf("Hello from block: %u, thread: %u\n", blockIdx.x, threadIdx.x);
 }
 
-int main(){
+int main() {
   hello<<<2, 2>>>();
-  cudaDeviceSynchronize();
+  cudaError_t err = cudaDeviceSynchronize();
+  if (err != cudaSuccess) {
+      printf("CUDA error: %s\n", cudaGetErrorString(err));
+  }
+
+  return 0;
 }
 
